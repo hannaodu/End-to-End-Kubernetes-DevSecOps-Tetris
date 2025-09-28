@@ -6,7 +6,6 @@ pipeline {
     }
     environment {
         SCANNER_HOME = tool 'sonar-scanner'
-        DOCKER_IMAGE = 'hanna10/tetrisv1'  
     }
     stages {
         stage('Cleaning Workspace') {
@@ -54,56 +53,47 @@ pipeline {
                 }
             }
         }
-        
-        // === REPLACED: Trivy File Scan ===
-        stage('Trivy File Scan') {
+        stage('Install and Run Trivy') {
             steps {
                 dir('Tetris-V1') {
-                    script {
-                        sh '''
-                            # Simple one-liner Trivy installation and scan
-                            curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /tmp && /tmp/trivy fs . --exit-code 0 > trivyfs.txt
-                            echo "Trivy scan completed"
-                        '''
-                    }
+                    sh '''
+                        # Download and install Trivy
+                        wget -O /tmp/trivy.tar.gz https://github.com/aquasecurity/trivy/releases/download/v0.49.1/trivy_0.49.1_Linux-64bit.tar.gz
+                        tar -xzf /tmp/trivy.tar.gz -C /tmp
+                        # Run file scan
+                        /tmp/trivy fs . --exit-code 0 > trivyfs.txt
+                        echo "Trivy file scan completed"
+                    '''
                 }
             }
         }
         
-        // === REPLACED: Docker Image Build ===
         stage("Docker Image Build") {
             steps {
-                script {
-                    dir('Tetris-V1') {
-                        sh 'docker build -t tetrisv1 .'
-                    }
+                dir('Tetris-V1') {
+                    sh 'docker build -t tetrisv1 .'
                 }
             }
         }
         
-        // === REPLACED: Docker Image Pushing ===
         stage("Docker Image Pushing") {
             steps {
                 script {
                     withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {
                         sh """
-                            docker tag tetrisv1 ${DOCKER_IMAGE}:${BUILD_NUMBER}
-                            docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}
+                            docker tag tetrisv1 hanna10/tetrisv1:${BUILD_NUMBER}
+                            docker push hanna10/tetrisv1:${BUILD_NUMBER}
                         """
                     }
                 }
             }
         }
-        
-        // === REPLACED: TRIVY Image Scan ===
         stage("TRIVY Image Scan") {
             steps {
-                script {
-                    sh """
-                        /tmp/trivy image ${DOCKER_IMAGE}:${BUILD_NUMBER} --exit-code 0 > trivyimage.txt
-                        echo "Trivy image scan completed"
-                    """
-                }
+                sh """
+                    /tmp/trivy image hanna10/tetrisv1:${BUILD_NUMBER} --exit-code 0 > trivyimage.txt
+                    echo "Trivy image scan completed"
+                """
             }
         }
         
@@ -119,7 +109,6 @@ pipeline {
                             git config user.email "tennyalana@yahoo.com"
                             git config user.name "hannaodu"
                             echo "Build Number: ${BUILD_NUMBER}"
-                            # Extract current image tag and replace with new build number
                             sed -i "s|tetrisv1:[^\\\"']*|tetrisv1:${BUILD_NUMBER}|g" deployment-service.yml
                             git add deployment-service.yml
                             git commit -m "Update deployment Image to version ${BUILD_NUMBER}"
