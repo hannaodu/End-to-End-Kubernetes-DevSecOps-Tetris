@@ -53,14 +53,16 @@ pipeline {
                 }
             }
         }
+        
+        // === MINIMAL TRIVY APPROACH ===
         stage('Install and Run Trivy') {
             steps {
                 dir('Tetris-V1') {
                     sh '''
-                        # Download and install Trivy
-                        wget -O /tmp/trivy.tar.gz https://github.com/aquasecurity/trivy/releases/download/v0.49.1/trivy_0.49.1_Linux-64bit.tar.gz
+                        # Download Trivy binary directly
+                        curl -L -o /tmp/trivy.tar.gz https://github.com/aquasecurity/trivy/releases/download/v0.49.1/trivy_0.49.1_Linux-64bit.tar.gz
                         tar -xzf /tmp/trivy.tar.gz -C /tmp
-                        # Run file scan
+                        chmod +x /tmp/trivy
                         /tmp/trivy fs . --exit-code 0 > trivyfs.txt
                         echo "Trivy file scan completed"
                     '''
@@ -88,6 +90,7 @@ pipeline {
                 }
             }
         }
+        
         stage("TRIVY Image Scan") {
             steps {
                 sh """
