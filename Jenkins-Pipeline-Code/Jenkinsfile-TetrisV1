@@ -3,10 +3,10 @@ pipeline {
     tools {
         jdk 'jdk'
         nodejs 'nodejs'
-        hudson.plugins.sonar.SonarRunnerInstallation 'sonar-scanner'
+        
     }
     environment {
-        SCANNER_HOME = tool 'sonar-scanner'
+        SCANNER_HOME = tool 'sonar-scanner'  
         DOCKER_IMAGE = 'avian19/tetrisv1'
     }
     stages {
