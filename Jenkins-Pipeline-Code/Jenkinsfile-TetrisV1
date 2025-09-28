@@ -7,6 +7,7 @@ pipeline {
     environment {
         SCANNER_HOME = tool 'sonar-scanner'
         DOCKER_IMAGE = 'hanna10/tetrisv1'  
+    }
     stages {
         stage('Cleaning Workspace') {
             steps {
@@ -53,32 +54,34 @@ pipeline {
                 }
             }
         }
+        
+        // === REPLACED: Trivy File Scan ===
         stage('Trivy File Scan') {
             steps {
                 dir('Tetris-V1') {
                     script {
                         sh '''
-                            # Install Trivy
-                            curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /tmp
-                            # Run Trivy file system scan
-                            /tmp/trivy fs . --exit-code 0 --format table > trivyfs.txt
-                            echo "Trivy file scan completed. Results saved to trivyfs.txt"
+                            # Simple one-liner Trivy installation and scan
+                            curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /tmp && /tmp/trivy fs . --exit-code 0 > trivyfs.txt
+                            echo "Trivy scan completed"
                         '''
                     }
                 }
             }
         }
+        
+        // === REPLACED: Docker Image Build ===
         stage("Docker Image Build") {
             steps {
                 script {
                     dir('Tetris-V1') {
-                        withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {
-                            sh 'docker build -t tetrisv1 .'
-                        }
+                        sh 'docker build -t tetrisv1 .'
                     }
                 }
             }
         }
+        
+        // === REPLACED: Docker Image Pushing ===
         stage("Docker Image Pushing") {
             steps {
                 script {
@@ -91,19 +94,19 @@ pipeline {
                 }
             }
         }
+        
+        // === REPLACED: TRIVY Image Scan ===
         stage("TRIVY Image Scan") {
             steps {
                 script {
                     sh """
-                        # Install Trivy
-                        curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /tmp
-                        # Run Trivy image scan
-                        /tmp/trivy image ${DOCKER_IMAGE}:${BUILD_NUMBER} --exit-code 0 --format table > trivyimage.txt
-                        echo "Trivy image scan completed. Results saved to trivyimage.txt"
+                        /tmp/trivy image ${DOCKER_IMAGE}:${BUILD_NUMBER} --exit-code 0 > trivyimage.txt
+                        echo "Trivy image scan completed"
                     """
                 }
             }
         }
+        
         stage('Update Deployment file') {
             environment {
                 GIT_REPO_NAME = "End-to-End-Kubernetes-DevSecOps-Tetris"
