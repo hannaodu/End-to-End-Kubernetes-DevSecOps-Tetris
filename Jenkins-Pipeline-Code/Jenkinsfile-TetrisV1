@@ -15,7 +15,7 @@ pipeline {
         }
         stage('Checkout from Git') {
             steps {
-                git branch: 'main', url: 'https://github.com/hannaodu/End-to-End-Kubernetes-DevSecOps-Tetris-Project.git'
+                git branch: 'main', url: 'https://github.com/hannaodu/End-to-End-Kubernetes-DevSecOps-Tetris.git'
             }
         }
         stage('Sonarqube Analysis') {
@@ -87,12 +87,12 @@ pipeline {
         }
         stage('Checkout Code') {
             steps {
-                git branch: 'main', url: 'https://github.com/hannaodu/End-to-End-Kubernetes-DevSecOps-Tetris-Project.git'
+                git branch: 'main', url: 'https://github.com/hannaodu/End-to-End-Kubernetes-DevSecOps-Tetris.git'
             }
         }
         stage('Update Deployment file') {
             environment {
-                GIT_REPO_NAME = "End-to-End-Kubernetes-DevSecOps-Tetris-Project"
+                GIT_REPO_NAME = "End-to-End-Kubernetes-DevSecOps-Tetris"
                 GIT_USER_NAME = "hannaodu"
             }
             steps {
