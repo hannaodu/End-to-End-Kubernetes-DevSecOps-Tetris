@@ -7,8 +7,6 @@
 # KEYS AND PASSWORDS - NEVER PUSH THESE!
 *.pem
 *.key
-*.tfvars
-variables.tfvars
 
 # MACOS
 .DS_Store
