@@ -1,0 +1,20 @@
+# TERRAFORM - NEVER PUSH THESE!
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+
+# KEYS AND PASSWORDS - NEVER PUSH THESE!
+*.pem
+*.key
+*.tfvars
+variables.tfvars
+
+# MACOS
+.DS_Store
+
+# NODE
+node_modules/
+
+# PROVIDER BINARIES
+**/providers/
