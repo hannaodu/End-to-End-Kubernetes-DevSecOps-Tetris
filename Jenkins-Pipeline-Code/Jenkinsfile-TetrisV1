@@ -7,7 +7,7 @@ pipeline {
     }
     environment {
         SCANNER_HOME = tool 'sonar-scanner'  
-        DOCKER_IMAGE = 'avian19/tetrisv1'
+        DOCKER_IMAGE = 'hanna10/tetrisv1'
     }
     stages {
         stage('Cleaning Workspace') {
