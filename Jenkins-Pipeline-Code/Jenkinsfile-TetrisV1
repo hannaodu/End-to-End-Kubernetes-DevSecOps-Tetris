@@ -1,12 +1,11 @@
 pipeline {
-    agent any 
+    agent any
     tools {
         jdk 'jdk'
         nodejs 'nodejs'
-        
     }
     environment {
-        SCANNER_HOME = tool 'sonar-scanner'  
+        SCANNER_HOME = tool 'sonar-scanner'
         DOCKER_IMAGE = 'hanna10/tetrisv1'
     }
     stages {
@@ -36,7 +35,7 @@ pipeline {
         stage('Quality Check') {
             steps {
                 script {
-                    waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token' 
+                    waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token'
                 }
             }
         }
@@ -59,10 +58,12 @@ pipeline {
             steps {
                 dir('Tetris-V1') {
                     script {
-                       
                         sh '''
+                            # Install Trivy if not available
                             which trivy || curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /tmp
-                            /tmp/trivy fs . --exit-code 0 --format table > trivyfs.txt 2>&1
+                            # Run Trivy file system scan
+                            /tmp/trivy fs . --exit-code 0 --format table > trivyfs.txt
+                            echo "Trivy file scan completed. Results saved to trivyfs.txt"
                         '''
                     }
                 }
@@ -72,7 +73,7 @@ pipeline {
             steps {
                 script {
                     dir('Tetris-V1') {
-                        withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {   
+                        withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {
                             sh 'docker build -t tetrisv1 .'
                         }
                     }
@@ -82,10 +83,10 @@ pipeline {
         stage("Docker Image Pushing") {
             steps {
                 script {
-                    withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {   
+                    withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {
                         sh """
-                            docker tag tetrisv1 ${DOCKER_IMAGE}:${BUILD_NUMBER}
-                            docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}
+                            docker tag tetrisv1 avian19/tetrisv1:${BUILD_NUMBER}
+                            docker push avian19/tetrisv1:${BUILD_NUMBER}
                         """
                     }
                 }
@@ -94,10 +95,12 @@ pipeline {
         stage("TRIVY Image Scan") {
             steps {
                 script {
-                    
                     sh """
+                        # Install Trivy if not available
                         which trivy || curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /tmp
-                        /tmp/trivy image ${DOCKER_IMAGE}:${BUILD_NUMBER} --exit-code 0 --format table > trivyimage.txt 2>&1
+                        # Run Trivy image scan
+                        /tmp/trivy image avian19/tetrisv1:${BUILD_NUMBER} --exit-code 0 --format table > trivyimage.txt
+                        echo "Trivy image scan completed. Results saved to trivyimage.txt"
                     """
                 }
             }
