@@ -76,47 +76,47 @@ pipeline {
             }
         }
         
-        stage("Docker Push") {
-            steps {
-                script {
-                    withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {
-                        sh """
-                            docker tag tetrisv1 hanna10/tetrisv1:${BUILD_NUMBER}
-                            docker push hanna10/tetrisv1:${BUILD_NUMBER}
-                        """
-                    }
-                }
-            }
-        }
-        
-        stage("Image Security Scan") {
-            steps {
+      stage("Docker Push") {
+    steps {
+        script {
+            withDockerRegistry([credentialsId: 'docker', url: '']) {
                 sh """
-                    /tmp/trivy image hannaodu/tetrisv1:${BUILD_NUMBER} --exit-code 0 --format table > trivyimage.txt
-                    echo "Image security scan completed"
+                    docker tag tetrisv1 hannaodu/tetrisv1:${env.BUILD_NUMBER}
+                    docker push hannaodu/tetrisv1:${env.BUILD_NUMBER}
                 """
             }
         }
+    }
+}
+        
+       stage("Image Security Scan") {
+    steps {
+        sh """
+            /tmp/trivy image hannaodu/tetrisv1:${env.BUILD_NUMBER} --exit-code 0 --format table > trivyimage.txt
+            echo "Image security scan completed"
+        """
+    }
+}
         
         stage('Update Deployment') {
-            environment {
-                GIT_REPO_NAME = "End-to-End-Kubernetes-DevSecOps-Tetris"
-                GIT_USER_NAME = "hannaodu"
-            }
-            steps {
-                dir('Manifest-file') {
-                    withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
-                        sh """
-                            git config user.email "tennyalana@yahoo.com"
-                            git config user.name "hannaodu"
-                            sed -i "s|tetrisv1:[^\\\"']*|tetrisv1:${BUILD_NUMBER}|g" deployment-service.yml
-                            git add deployment-service.yml
-                            git commit -m "Update deployment Image to version ${BUILD_NUMBER}"
-                            git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git HEAD:main
-                        """
-                    }
-                }
+    environment {
+        GIT_REPO_NAME = "End-to-End-Kubernetes-DevSecOps-Tetris"
+        GIT_USER_NAME = "hannaodu"
+    }
+    steps {
+        dir('Manifest-file') {
+            withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
+                sh """
+                    git config user.email "tennyalana@yahoo.com"
+                    git config user.name "hannaodu"
+                    sed -i "s|hanna10/tetrisv1:[^\\\"']*|hannaodu/tetrisv1:${BUILD_NUMBER}|g" deployment-service.yml
+                    git add deployment-service.yml
+                    git commit -m "Update deployment Image to version ${BUILD_NUMBER}"
+                    git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git HEAD:main
+                """
             }
         }
+    }
+}
     }
 }
