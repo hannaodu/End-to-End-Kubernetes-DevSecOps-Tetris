@@ -15,11 +15,7 @@ spec:
     spec:
       containers:
       - name: tetris
-<<<<<<< HEAD
         image: hannaodu/tetrisv2:latest
-=======
-        image: hannaodu/tetrisv1:1
->>>>>>> ad141b14a0a5b73dce3fcce50faf535bd8e662d2
         ports:
         - containerPort: 3000
 ---
