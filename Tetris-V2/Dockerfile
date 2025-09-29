@@ -7,9 +7,8 @@ WORKDIR /app
 # Copy package.json and package-lock.json (or yarn.lock) to the container
 COPY package*.json ./
 
-# Clear npm cache and install with clean slate
-RUN npm cache clean --force
-RUN npm install --include=dev
+# Install project dependencies
+RUN npm install
 
 # Copy the rest of the application code to the container
 COPY . .
