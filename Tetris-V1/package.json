@@ -37,6 +37,6 @@
     ]
   },
   "devDependencies": {
-    "css-loader": "^7.1.2"
+    "react-scripts": "^5.0.1"
   }
 }
