@@ -45,13 +45,13 @@ pipeline {
                 }
             }
         }
-        stage('OWASP Dependency-Check Scan') {
-            steps {
-                dir('Tetris-V1') {
-                    dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP-Check'
-                    dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
-                }
-            }
+       stage('OWASP Dependency-Check Scan') {
+    steps {
+        dependencyCheck additionalArguments: '--scan . --format HTML --format JSON', 
+                         odcInstallation: 'DP-Check'
+        dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+    }
+}
         }
         
         // === SIMPLE TRIVY DOWNLOAD ===
