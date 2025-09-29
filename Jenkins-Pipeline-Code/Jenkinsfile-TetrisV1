@@ -54,23 +54,23 @@ pipeline {
             }
         }
         
-        // === MINIMAL TRIVY APPROACH ===
-        stage('Install and Run Trivy') {
+        // === SIMPLE TRIVY DOWNLOAD ===
+        stage('Security Scan') {
             steps {
                 dir('Tetris-V1') {
                     sh '''
-                        # Download Trivy binary directly
-                        curl -L -o /tmp/trivy.tar.gz https://github.com/aquasecurity/trivy/releases/download/v0.49.1/trivy_0.49.1_Linux-64bit.tar.gz
-                        tar -xzf /tmp/trivy.tar.gz -C /tmp
-                        chmod +x /tmp/trivy
-                        /tmp/trivy fs . --exit-code 0 > trivyfs.txt
-                        echo "Trivy file scan completed"
+                        # Download and extract Trivy
+                        wget -q -O /tmp/trivy.tar.gz https://github.com/aquasecurity/trivy/releases/download/v0.49.1/trivy_0.49.1_Linux-64bit.tar.gz
+                        tar -xzf /tmp/trivy.tar.gz -C /tmp trivy
+                        # Run scan
+                        /tmp/trivy fs . --exit-code 0 --format table > trivyfs.txt
+                        echo "Security scan completed"
                     '''
                 }
             }
         }
         
-        stage("Docker Image Build") {
+        stage("Docker Build") {
             steps {
                 dir('Tetris-V1') {
                     sh 'docker build -t tetrisv1 .'
@@ -78,7 +78,7 @@ pipeline {
             }
         }
         
-        stage("Docker Image Pushing") {
+        stage("Docker Push") {
             steps {
                 script {
                     withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {
@@ -91,16 +91,16 @@ pipeline {
             }
         }
         
-        stage("TRIVY Image Scan") {
+        stage("Image Security Scan") {
             steps {
                 sh """
-                    /tmp/trivy image hanna10/tetrisv1:${BUILD_NUMBER} --exit-code 0 > trivyimage.txt
-                    echo "Trivy image scan completed"
+                    /tmp/trivy image hanna10/tetrisv1:${BUILD_NUMBER} --exit-code 0 --format table > trivyimage.txt
+                    echo "Image security scan completed"
                 """
             }
         }
         
-        stage('Update Deployment file') {
+        stage('Update Deployment') {
             environment {
                 GIT_REPO_NAME = "End-to-End-Kubernetes-DevSecOps-Tetris"
                 GIT_USER_NAME = "hannaodu"
@@ -111,7 +111,6 @@ pipeline {
                         sh """
                             git config user.email "tennyalana@yahoo.com"
                             git config user.name "hannaodu"
-                            echo "Build Number: ${BUILD_NUMBER}"
                             sed -i "s|tetrisv1:[^\\\"']*|tetrisv1:${BUILD_NUMBER}|g" deployment-service.yml
                             git add deployment-service.yml
                             git commit -m "Update deployment Image to version ${BUILD_NUMBER}"
