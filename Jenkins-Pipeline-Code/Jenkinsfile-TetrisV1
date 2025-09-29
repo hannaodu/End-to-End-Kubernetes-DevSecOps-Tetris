@@ -34,7 +34,7 @@ pipeline {
         stage('Quality Check') {
             steps {
                 script {
-                    waitForQualityGate abortPipeline: false, credentialsId: 'sonor-token'
+                    waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token'
                 }
             }
         }
@@ -45,22 +45,22 @@ pipeline {
                 }
             }
         }
-     stage('OWASP Dependency-Check Scan') {
-    steps {
-        dependencyCheck additionalArguments: '--scan . --format HTML --format JSON --format XML',
-                        odcInstallation: 'DP-Check'
-        dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
-    }
-}
-
+        stage('OWASP Dependency-Check Scan') {
+            steps {
+                dir('Tetris-V1') {
+                    dependencyCheck additionalArguments: '--scan . --format HTML --format JSON --project TetrisV1', 
+                                 odcInstallation: 'DP-Check'
+                    dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+                }
+            }
+        }
+        
         stage('Security Scan') {
             steps {
                 dir('Tetris-V1') {
                     sh '''
-                        # Download and extract Trivy
                         wget -q -O /tmp/trivy.tar.gz https://github.com/aquasecurity/trivy/releases/download/v0.49.1/trivy_0.49.1_Linux-64bit.tar.gz
                         tar -xzf /tmp/trivy.tar.gz -C /tmp trivy
-                        # Run scan
                         /tmp/trivy fs . --exit-code 0 --format table > trivyfs.txt
                         echo "Security scan completed"
                     '''
