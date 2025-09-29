@@ -92,7 +92,7 @@ pipeline {
         stage("Image Security Scan") {
             steps {
                 sh """
-                    /tmp/trivy image hanna10/tetrisv1:${BUILD_NUMBER} --exit-code 0 --format table > trivyimage.txt
+                    /tmp/trivy image hannaodu/tetrisv1:${BUILD_NUMBER} --exit-code 0 --format table > trivyimage.txt
                     echo "Image security scan completed"
                 """
             }
