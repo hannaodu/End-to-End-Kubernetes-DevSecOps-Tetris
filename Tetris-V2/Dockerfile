@@ -1,6 +1,9 @@
 # Use the official Node.js 16 image as the base image
 FROM node:18
 
+# Set OpenSSL legacy provider for compatibility
+ENV NODE_OPTIONS="--openssl-legacy-provider"
+
 # Set the working directory inside the container
 WORKDIR /app
 
