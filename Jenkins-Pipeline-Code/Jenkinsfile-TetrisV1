@@ -45,13 +45,14 @@ pipeline {
                 }
             }
         }
-       stage('OWASP Dependency-Check Scan') {
+     stage('OWASP Dependency-Check Scan') {
     steps {
-        dependencyCheck additionalArguments: '--scan . --format HTML,JSON,XML --out dependency-check-report',
+        dependencyCheck additionalArguments: '--scan . --format HTML --format JSON --format XML',
                         odcInstallation: 'DP-Check'
-        dependencyCheckPublisher pattern: 'dependency-check-report/dependency-check-report.xml'
+        dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
     }
 }
+
         stage('Security Scan') {
             steps {
                 dir('Tetris-V1') {
