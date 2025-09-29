@@ -109,7 +109,7 @@ pipeline {
                 sh """
                     git config user.email "tennyalana@yahoo.com"
                     git config user.name "hannaodu"
-                    sed -i "s|hanna10/tetrisv1:[^\\\"']*|hannaodu/tetrisv1:${BUILD_NUMBER}|g" deployment-service.yml
+                    sed -i "s|hannaodu/tetrisv1:[^\\\"']*|hannaodu/tetrisv1:${BUILD_NUMBER}|g" deployment-service.yml
                     git add deployment-service.yml
                     git commit -m "Update deployment Image to version ${BUILD_NUMBER}"
                     git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git HEAD:main
