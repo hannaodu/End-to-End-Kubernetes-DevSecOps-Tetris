@@ -1,5 +1,5 @@
 # Use the official Node.js 16 image as the base image
-FROM node:16
+FROM node:18
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -7,8 +7,9 @@ WORKDIR /app
 # Copy package.json and package-lock.json (or yarn.lock) to the container
 COPY package*.json ./
 
-# Install project dependencies
-RUN npm install
+# Clear npm cache and install with clean slate
+RUN npm cache clean --force
+RUN npm install --include=dev
 
 # Copy the rest of the application code to the container
 COPY . .
