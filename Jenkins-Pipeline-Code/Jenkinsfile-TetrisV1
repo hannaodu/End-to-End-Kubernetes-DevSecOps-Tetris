@@ -34,7 +34,7 @@ pipeline {
         stage('Quality Check') {
             steps {
                 script {
-                    waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token'
+                    waitForQualityGate abortPipeline: false, credentialsId: 'sonor-token'
                 }
             }
         }
@@ -45,13 +45,12 @@ pipeline {
                 }
             }
         }
-       stage('OWASP Dependency-Check Scan') {
-    steps {
-        dependencyCheck additionalArguments: '--scan . --format HTML --format JSON', 
-                         odcInstallation: 'DP-Check'
-        dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
-    }
-}
+        stage('OWASP Dependency-Check Scan') {
+            steps {
+                dependencyCheck additionalArguments: '--scan . --format HTML --format JSON', 
+                             odcInstallation: 'DP-Check'
+                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+            }
         }
         
         // === SIMPLE TRIVY DOWNLOAD ===
@@ -121,3 +120,4 @@ pipeline {
             }
         }
     }
+}
